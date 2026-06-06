@@ -1,97 +1,122 @@
-// Drawing app with camera + color extraction (merged student-style)
 let canvas;
 let vid;
 let overlay;
-const TOOLBAR_H = 60;
 
-let paletteButtons = [];
-let paletteColors = ['#000000','#FF0000','#FFA500','#FFFF00','#00FF00','#00FFFF','#0000FF','#800080','#FFC0CB','#808080'];
-
+let b1, b2, b3, b4, b5, b6, b7, b8, b9, b10;
 let sizeSlider, clearBtn, saveBtn, eraserBtn, eyedropBtn, modeBtn;
-let brushColor = '#000000';
+
+let brushColor = [0, 0, 0]; 
 let brushSize = 6;
 let isEraser = false;
 let isEyedrop = false;
-let bgMode = 'video'; // 'video' or 'white'
-let saved = [];
-let copiedMsg = '';
-let copiedAt = 0;
+let bgMode = 'video'; 
+let saved = []; // 스포이드 저장 배열
 let lastX = null;
 let lastY = null;
-
-function preload() {
-  // try to use camera if available; fallback to test.mp4 if provided
-  try {
-    // nothing in preload for camera; but user may have test.mp4 — try to load if exists
-    vid = createCapture(VIDEO);
-  } catch (e) {
-    // ignore
-  }
-}
+let saveCount = 0; 
 
 function setup() {
-  canvas = createCanvas(windowWidth, windowHeight - TOOLBAR_H);
-  canvas.position(0, TOOLBAR_H);
+  canvas = createCanvas(1024, 768);
+  canvas.position(0, 60);
 
-  // video capture
-  if (!vid) vid = createCapture(VIDEO);
+  if (vid === undefined) {
+    vid = createCapture(VIDEO);
+  }
   vid.size(width, height);
   vid.hide();
 
   overlay = createGraphics(width, height);
   overlay.clear();
 
-  // palette buttons
-  const sw = 30, gap = 8;
-  let x = 10;
-  for (let i = 0; i < paletteColors.length; i++) {
-    let c = paletteColors[i];
-    let b = createButton('');
-    b.style('background-color', c);
-    b.style('border', i === 0 ? '3px solid #333' : '1px solid #aaa');
-    b.style('width', sw + 'px');
-    b.style('height', sw + 'px');
-    b.position(x, 15);
-    b.mousePressed(((col, idx)=>{
-      return ()=>{
-        brushColor = col;
-        isEraser = false;
-        isEyedrop = false;
-        paletteButtons.forEach((pb,j)=> pb.style('border', j===idx ? '3px solid #333' : '1px solid #aaa'));
-        eyedropBtn.html('Eyedrop');
-        eraserBtn.html('Eraser');
-      }
-    })(c, i));
-    paletteButtons.push(b);
-    x += sw + gap;
-  }
+  b1 = createButton(''); b1.style('background-color', 'rgb(0,0,0)'); b1.style('border', '1px solid #aaa'); b1.size(30,30); b1.position(10, 15);
+  b1.mousePressed(function() { brushColor = [0,0,0]; isEraser = false; isEyedrop = false; eyedropBtn.html('Eyedrop'); eraserBtn.html('Eraser'); });
 
+  b2 = createButton(''); b2.style('background-color', 'rgb(255,0,0)'); b2.style('border', '1px solid #aaa'); b2.size(30,30); b2.position(48, 15);
+  b2.mousePressed(function() { brushColor = [255,0,0]; isEraser = false; isEyedrop = false; eyedropBtn.html('Eyedrop'); eraserBtn.html('Eraser'); });
+
+  b3 = createButton(''); b3.style('background-color', 'rgb(255,165,0)'); b3.style('border', '1px solid #aaa'); b3.size(30,30); b3.position(86, 15);
+  b3.mousePressed(function() { brushColor = [255,165,0]; isEraser = false; isEyedrop = false; eyedropBtn.html('Eyedrop'); eraserBtn.html('Eraser'); });
+
+  b4 = createButton(''); b4.style('background-color', 'rgb(255,255,0)'); b4.style('border', '1px solid #aaa'); b4.size(30,30); b4.position(124, 15);
+  b4.mousePressed(function() { brushColor = [255,255,0]; isEraser = false; isEyedrop = false; eyedropBtn.html('Eyedrop'); eraserBtn.html('Eraser'); });
+
+  b5 = createButton(''); b5.style('background-color', 'rgb(0,255,0)'); b5.style('border', '1px solid #aaa'); b5.size(30,30); b5.position(162, 15);
+  b5.mousePressed(function() { brushColor = [0,255,0]; isEraser = false; isEyedrop = false; eyedropBtn.html('Eyedrop'); eraserBtn.html('Eraser'); });
+
+  b6 = createButton(''); b6.style('background-color', 'rgb(0,255,255)'); b6.style('border', '1px solid #aaa'); b6.size(30,30); b6.position(200, 15);
+  b6.mousePressed(function() { brushColor = [0,255,255]; isEraser = false; isEyedrop = false; eyedropBtn.html('Eyedrop'); eraserBtn.html('Eraser'); });
+
+  b7 = createButton(''); b7.style('background-color', 'rgb(0,0,255)'); b7.style('border', '1px solid #aaa'); b7.size(30,30); b7.position(238, 15);
+  b7.mousePressed(function() { brushColor = [0,0,255]; isEraser = false; isEyedrop = false; eyedropBtn.html('Eyedrop'); eraserBtn.html('Eraser'); });
+
+  b8 = createButton(''); b8.style('background-color', 'rgb(128,0,128)'); b8.style('border', '1px solid #aaa'); b8.size(30,30); b8.position(276, 15);
+  b8.mousePressed(function() { brushColor = [128,0,128]; isEraser = false; isEyedrop = false; eyedropBtn.html('Eyedrop'); eraserBtn.html('Eraser'); });
+
+  b9 = createButton(''); b9.style('background-color', 'rgb(255,192,203)'); b9.style('border', '1px solid #aaa'); b9.size(30,30); b9.position(314, 15);
+  b9.mousePressed(function() { brushColor = [255,192,203]; isEraser = false; isEyedrop = false; eyedropBtn.html('Eyedrop'); eraserBtn.html('Eraser'); });
+
+  b10 = createButton(''); b10.style('background-color', 'rgb(128,128,128)'); b10.style('border', '1px solid #aaa'); b10.size(30,30); b10.position(352, 15);
+  b10.mousePressed(function() { brushColor = [128,128,128]; isEraser = false; isEyedrop = false; eyedropBtn.html('Eyedrop'); eraserBtn.html('Eraser'); });
+
+  // 기능 버튼들 위치 설정 
   sizeSlider = createSlider(1, 80, brushSize, 1);
-  sizeSlider.position(x + 20, 22);
+  sizeSlider.position(410, 22);
 
   clearBtn = createButton('Clear');
-  clearBtn.position(x + 160, 18);
-  clearBtn.mousePressed(()=> { overlay.clear(); });
+  clearBtn.position(550, 18);
+  clearBtn.mousePressed(function() {
+    overlay.clear();
+  });
 
   saveBtn = createButton('Save');
-  saveBtn.position(x + 220, 18);
+  saveBtn.position(610, 18);
   saveBtn.mousePressed(saveSketch);
 
   eraserBtn = createButton('Eraser');
-  eraserBtn.position(x + 280, 18);
-  eraserBtn.mousePressed(()=> { isEraser = !isEraser; eraserBtn.html(isEraser ? 'Eraser ✓' : 'Eraser'); if(isEraser) { isEyedrop = false; eyedropBtn.html('Eyedrop'); }});
+  eraserBtn.position(670, 18);
+  eraserBtn.mousePressed(function() {
+    if (isEraser === false) {
+      isEraser = true;
+      eraserBtn.html('Eraser O'); 
+      isEyedrop = false;
+      eyedropBtn.html('Eyedrop');
+    } else {
+      isEraser = false;
+      eraserBtn.html('Eraser');
+    }
+  });
 
   eyedropBtn = createButton('Eyedrop');
-  eyedropBtn.position(x + 340, 18);
-  eyedropBtn.mousePressed(()=> { isEyedrop = !isEyedrop; eyedropBtn.html(isEyedrop ? 'Eyedrop ✓' : 'Eyedrop'); if(isEyedrop) { isEraser = false; eraserBtn.html('Eraser'); }});
+  eyedropBtn.position(730, 18);
+  eyedropBtn.mousePressed(function() {
+    if (isEyedrop === false) {
+      isEyedrop = true;
+      eyedropBtn.html('Eyedrop O');
+      isEraser = false;
+      eraserBtn.html('Eraser');
+    } else {
+      isEyedrop = false;
+      eyedropBtn.html('Eyedrop');
+    }
+  });
 
   modeBtn = createButton('Mode: Video');
-  modeBtn.position(x + 420, 18);
-  modeBtn.mousePressed(()=>{ bgMode = (bgMode === 'video') ? 'white' : 'video'; modeBtn.html(bgMode === 'video' ? 'Mode: Video' : 'Mode: White'); });
+  modeBtn.position(810, 18);
+  modeBtn.mousePressed(function() {
+    if (bgMode === 'video') {
+      bgMode = 'white';
+      modeBtn.html('Mode: White');
+    } else {
+      bgMode = 'video';
+      modeBtn.html('Mode: Video');
+    }
+  });
 
   let clearSaved = createButton('Clear Saved');
-  clearSaved.position(x + 520, 18);
-  clearSaved.mousePressed(()=> saved = []);
+  clearSaved.position(910, 18);
+  clearSaved.mousePressed(function() {
+    saved = [];
+  });
 
   textSize(12);
 }
@@ -99,133 +124,112 @@ function setup() {
 function draw() {
   brushSize = sizeSlider.value();
 
-  // background
   if (bgMode === 'video') {
     image(vid, 0, 0, width, height);
   } else {
     background(255);
   }
 
-  // draw overlay
   image(overlay, 0, 0);
 
-  // drawing
-  if (mouseIsPressed && mouseY > TOOLBAR_H) {
-    overlay.strokeWeight(brushSize);
-    overlay.strokeCap(ROUND);
-    let x = mouseX;
-    let y = mouseY - TOOLBAR_H;
-    if (isEraser) {
-      if (bgMode === 'white') {
-        overlay.noErase();
-        overlay.stroke(255);
+  // 마우스 누르고 있을 때 그리기 로직
+  if (mouseIsPressed === true) {
+    if (mouseY > 30) { 
+      overlay.strokeWeight(brushSize);
+      overlay.strokeCap(ROUND);
+      
+      // 지우개 모드일 때 배경에 따라 다른 처리
+      if (isEraser === true) {
+        if (bgMode === 'white') {
+          overlay.noErase();
+          overlay.stroke(255);
+        } else {
+          overlay.erase();
+        }
       } else {
-        overlay.erase();
+        overlay.noErase();
+        overlay.stroke(brushColor[0], brushColor[1], brushColor[2]);
       }
-    } else {
+      
+      if (lastX === null || lastY === null) {
+        overlay.ellipse(mouseX, mouseY, brushSize, brushSize); // 오프셋 제거로 거리 단축
+      } else {
+        overlay.line(lastX, lastY, mouseX, mouseY);            // 오프셋 제거로 거리 단축
+      }
+      
       overlay.noErase();
-      overlay.stroke(brushColor);
+      lastX = mouseX;
+      lastY = mouseY;                                           // 오프셋 제거로 거리 단축
     }
-    if (lastX !== null && lastY !== null) {
-      overlay.line(lastX, lastY, x, y);
-    } else {
-      overlay.ellipse(x, y, brushSize, brushSize);
-    }
-    overlay.noErase();
-    // update last pos continuously
-    lastX = x;
-    lastY = y;
   } else {
-    // when not drawing, reset last positions so next press starts fresh
     lastX = null;
     lastY = null;
   }
 
-  // toolbar overlay visuals
+  // 상단 바
   noStroke();
   fill(230);
-  rect(0, 0, width, TOOLBAR_H);
+  rect(0, 0, width, 60);
   fill(0);
-  text('Palette', 10, 12 + 18);
-  text('Size', 200 + 20, 30);
+  text('Palette', 10, 30);
+  text('Size', 413, 30); 
 
-  // hover color preview
-  if (mouseX >=0 && mouseX < width && mouseY >= TOOLBAR_H && mouseY < height + TOOLBAR_H) {
-    let p = get(mouseX, mouseY - TOOLBAR_H);
-    if (p && p.length >= 3) {
-      let h = rgbToHex(p[0], p[1], p[2]);
-      fill(h); stroke(0); rect(width - 160, 10, 40, 36); noStroke(); fill(0); text(h, width - 110, 32);
-    }
+  // 실시간 컬러피커
+  if (mouseY > 30) {
+    let p = get(mouseX, mouseY); // 오프셋 제거로 정확하게 일치
+    let rgbText = "rgb(" + p[0] + "," + p[1] + "," + p[2] + ")";
+    
+    fill(p[0], p[1], p[2]); 
+    stroke(0); 
+    rect(width - 200, 10, 40, 36); 
+    noStroke(); 
+    fill(0); 
+    text(rgbText, width - 150, 32);
   }
 
-  // draw saved palette
+  // 임시저장 색상들 출력
   for (let i = 0; i < saved.length; i++) {
-    fill(saved[i]);
-    rect(20 + i*34, TOOLBAR_H + 10, 30, 30);
-  }
-
-  // show copy feedback briefly
-  if (copiedMsg && (Date.now() - copiedAt) < 1500) {
-    fill(0);
-    rect(width - 220, TOOLBAR_H + 6, 210, 28);
-    fill(255);
-    textSize(14);
-    text(copiedMsg, width - 210, TOOLBAR_H + 26);
-    textSize(12);
+    fill(saved[i][0], saved[i][1], saved[i][2]);
+    rect(20 + i * 34, 70, 30, 30);
   }
 }
 
 function mousePressed() {
-  // ignore toolbar clicks
-  if (mouseY <= TOOLBAR_H) return;
-
-  // eyedrop pick: if eyedrop mode active, sample color under cursor and apply immediately
-  if (isEyedrop) {
-    let px = get(mouseX, mouseY - TOOLBAR_H);
-    if (px && px.length >= 3) {
-      let hex = rgbToHex(px[0], px[1], px[2]);
-      brushColor = hex;
-      // highlight if in palette
-      let idx = paletteColors.findIndex(c => c.toUpperCase() === hex);
-      paletteButtons.forEach((pb,j)=> pb.style('border', j===idx ? '3px solid #333' : '1px solid #aaa'));
-      // add to saved list
-      saved.unshift(hex);
-      if (saved.length > 12) saved.pop();
-    }
-    isEyedrop = false;
-    if (eyedropBtn) eyedropBtn.html('Eyedrop');
-    // continue so draw() will paint with new color in the same press
+  if (mouseY <= 30) {
+    return;
   }
 
-  // check saved palette clicks (saved swatches drawn at y = TOOLBAR_H + 10)
-  let swY1 = TOOLBAR_H + 10;
-  let swY2 = swY1 + 30;
-  if (mouseY >= swY1 && mouseY <= swY2) {
+  // 스포이드 기능
+  if (isEyedrop === true) {
+    let px = get(mouseX, mouseY); // 오프셋 제거로 정확하게 일치
+    brushColor = [px[0], px[1], px[2]];
+    
+    // 12개까지만 저장
+    if (saved.length < 12) { 
+      saved.push([px[0], px[1], px[2]]);
+    }
+    
+    isEyedrop = false;
+    eyedropBtn.html('Eyedrop');
+  }
+
+  // 임시 저장 박스 클릭 처리
+  if (mouseY >= 70 && mouseY <= 100) {
     for (let i = 0; i < saved.length; i++) {
-      let sx = 20 + i*34;
+      let sx = 20 + i * 34;
       let ex = sx + 30;
       if (mouseX >= sx && mouseX <= ex) {
-        // apply color to brush and copy to clipboard
-        let hex = saved[i];
-        brushColor = hex;
+        brushColor = saved[i];
         isEraser = false;
-        // de-highlight main palette
-        paletteButtons.forEach((pb,j)=> pb.style('border', j===0 ? '3px solid #333' : '1px solid #aaa'));
-        // copy to clipboard
-        copyToClipboard(hex);
-        copiedMsg = hex + ' copied';
-        copiedAt = Date.now();
-        return; // don't start drawing when clicking saved swatch
+        return; 
       }
     }
   }
 
-  // ensure first dot appears exactly at cursor so there's no gap when dragging
-  if (mouseY > TOOLBAR_H) {
-    // don't draw a dot here to avoid visible single-point marks; just set up lastX/lastY
+  if (mouseY > 60) {
     overlay.strokeWeight(brushSize);
     overlay.strokeCap(ROUND);
-    if (isEraser) {
+    if (isEraser === true) {
       if (bgMode === 'white') {
         overlay.noErase();
         overlay.stroke(255);
@@ -234,38 +238,14 @@ function mousePressed() {
       }
     } else {
       overlay.noErase();
-      overlay.stroke(brushColor);
+      overlay.stroke(brushColor[0], brushColor[1], brushColor[2]);
     }
   }
-  // set last pos for continuous drawing
   lastX = mouseX;
-  lastY = mouseY - TOOLBAR_H;
-}
-
-function copyToClipboard(text) {
-  // try modern clipboard API first
-  if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).catch(()=>{
-      // fallback
-      fallbackCopy(text);
-    });
-  } else {
-    fallbackCopy(text);
-  }
-}
-
-function fallbackCopy(text) {
-  // create temporary textarea
-  let ta = document.createElement('textarea');
-  ta.value = text;
-  document.body.appendChild(ta);
-  ta.select();
-  try { document.execCommand('copy'); } catch (e) {}
-  document.body.removeChild(ta);
+  lastY = mouseY; // draw 함수의 lastY와 완벽 결합
 }
 
 function saveSketch() {
-  // combine current background and overlay into an image and save
   let g = createGraphics(width, height);
   if (bgMode === 'video') {
     g.image(vid, 0, 0, width, height);
@@ -273,21 +253,7 @@ function saveSketch() {
     g.background(255);
   }
   g.image(overlay, 0, 0);
-  saveCanvas(g, 'my_paint_' + Date.now(), 'png');
-}
-
-function windowResized() {
-  let img = get();
-  resizeCanvas(windowWidth, windowHeight - TOOLBAR_H);
-  canvas.position(0, TOOLBAR_H);
-  vid.size(width, height);
-  let newOverlay = createGraphics(width, height);
-  newOverlay.clear();
-  newOverlay.image(img, 0, 0, width, height);
-  overlay = newOverlay;
-}
-
-function rgbToHex(r,g,b) {
-  const toHex = v => ('0' + Math.max(0, Math.min(255, floor(v))).toString(16)).slice(-2).toUpperCase();
-  return '#' + toHex(r) + toHex(g) + toHex(b);
+  
+  saveCanvas(g, 'my_drawing_' + saveCount, 'png');
+  saveCount = saveCount + 1;
 }
